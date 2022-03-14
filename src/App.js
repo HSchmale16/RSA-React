@@ -41,12 +41,49 @@ function extended_gcd(a, b) {
   return res;
 }
 
+/** computes ax (mod n) == 1 */
+function inverse(a, n) {
+  let t = 0n;
+  let new_t = 1n;
+  let r = n;
+  let new_r = a;
+
+  while (new_r !== 0n) {
+    let quot = r / new_r;
+
+    [t, new_t] = [new_t, t - quot * new_t];
+    [r, new_r] = [new_r, r - quot * new_r];
+  }
+
+  if (r > 1) {
+    return "ERROR"
+  }
+
+  if (t < 0) {
+    t = t + n;
+  }
+
+  return t;
+}
+
+function powmod(b, e, m) {
+  let c = 1n;
+  let eprime = 0;
+
+  do {
+    eprime += 1;
+    c = (b * c) % m;
+  } while (eprime < e);
+
+  return c;
+}
+
 function RSAExample() {
   const formInitialState = {
     p: 61n,
     q: 53n,
     e: 17n,
-    m: 69n // nice!!! : the message
+    m: 65n // nice!!! : the message
   }
 
   const [inputValues, dispatchFormValue] = useReducer(
@@ -66,7 +103,9 @@ function RSAExample() {
 
   const gcdETotient = gcd(e, totient);
   
-  const d = extended_gcd(e, totient);
+  const d = inverse(e, totient);
+
+  const c = powmod(m, e, n);
 
   /* React form bullshit */
 
@@ -107,7 +146,7 @@ function RSAExample() {
         Compute Carmichael's Totient Function
       </legend>
 
-      <label htmlFor="totient">λ(n) = lcm({p1.toString()}, {q1.toString()}) = </label>
+      <label htmlFor="totient">λ(n) = lcm(p-1, q-1) = lcm({p1.toString()}, {q1.toString()}) = </label>
       <input name="totient" value={totient.toString()} disabled/>
     </fieldset>
 
@@ -145,10 +184,21 @@ function RSAExample() {
       
       <fieldset>
         <legend>The Encrypted Message is</legend>
+
+        <p>
+          The public key is c(m) = m<sup>e</sup> mod n<br/>
+            c({m.toString()}) = {m.toString()} <sup>{e.toString()}</sup>
+            mod {n.toString()} = {c.toString()}
+        </p>
       </fieldset>
 
       <fieldset>
         <legend>To Decrypt the Message</legend>
+        <p>
+          The private key is m(c) = c<sup>d</sup> mod n<br/>
+            m({c.toString()}) = {c.toString()} <sup>{d.toString()}</sup>
+            mod {n.toString()} = {powmod(c, d, n).toString()}
+        </p>
       </fieldset>
 
     </fieldset>
