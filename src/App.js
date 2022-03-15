@@ -6,10 +6,25 @@
 import React, {useReducer} from "react";
 import './App.css'
 
+function rootNth(val, k=2n) {
+  let o = 0n; // old approx value
+  let x = val;
+  let limit = 100;
+  
+  while(x**k!==k && x!==o && --limit) {
+    o=x;
+    x = ((k-1n)*x + val/x**(k-1n))/k;
+  }
+  
+  return x;
+}
 
 function isPrime(n) {
-  for (let d = 2n; d <= n/2n; d++) {
-    console.log(d, n % d)
+  const to = rootNth(n);
+  if (n % 2n === 0n) return n === 2n;
+  if (n % 3n === 0n) return n === 5n;
+
+  for (let d = 5n; d <= to; d += 6n) {
     if (n % d === 0n) {
       return false;
     }
@@ -17,41 +32,22 @@ function isPrime(n) {
   return true;
 }
 
-function gcd(a, b) {
-  if (b === 0n) {
-    return a;
+
+function gcd_iter(a, b) {
+  var q, r;
+  while (b > 0n) {
+    q = a / b;
+    r = a - q * b;
+    a = b;
+    b = r;
   }
-  return gcd(b, a % b);
+  return a;
 }
 
 function lcm(a, b) {
-  return (a / gcd(a, b)) * b;
+  return (a / gcd_iter(a, b)) * b;
 }
 
-/**
- * Computes ax === b(mod m)
- * @param {*} e 
- * @param {*} tot 
- */
-function extended_gcd(a, b) {
-  let [old_r, r] = [a, b];
-  let [old_s, s] = [1n, 0n];
-  let [old_t, t] = [0n, 1n];
-
-  while (r !== 0n) {
-    let quotient = old_r / r;
-    [old_r, r] = [r, old_r - quotient * r];
-    [old_s, s] = [s, old_s - quotient * s];
-    [old_t, t] = [t, old_t - quotient * t];
-  }
-  let res = {
-    'bez': [old_s, old_t],
-    'gcd': old_r,
-    'quot': [t, s]
-  };
-  console.log('extended_gcd', res);
-  return res;
-}
 
 /** computes ax (mod n) == 1 */
 function inverse(a, n) {
@@ -78,16 +74,17 @@ function inverse(a, n) {
   return t;
 }
 
-function powmod(b, e, m) {
-  let c = 1n;
-  let eprime = 0;
-
-  do {
-    eprime += 1;
-    c = (b * c) % m;
-  } while (eprime < e);
-
-  return c;
+function powerMod(base, exponent, modulus) {
+  if (modulus === 1n) return 0;
+  var result = 1n;
+  base = base % modulus;
+  while (exponent > 0n) {
+      if (exponent % 2n === 1n)  //odd number
+          result = (result * base) % modulus;
+      exponent = exponent >> 1n; //divide by 2
+      base = (base * base) % modulus;
+  }
+  return result;
 }
 
 function RSAExample() {
@@ -105,12 +102,16 @@ function RSAExample() {
   )
   
   const {p, q, e, m} = inputValues;
+
   console.log(inputValues);
+
+  const pIsPrime = isPrime(p);
+  const qIsPrime = isPrime(q);
 
   var n='?',p1='?',q1='?',totient='?',gcdETotient='?',d='?',c='?';
   var m1 = '?';
 
-  if (p !== q && p !== 0n && q !== 0n && isPrime(p) && isPrime(q)) {
+  if (p !== q && p !== 0n && q !== 0n && pIsPrime && qIsPrime) {
     n = p * q;
 
     p1 = p - 1n;
@@ -118,12 +119,12 @@ function RSAExample() {
   
     totient = lcm(p1, q1);
   
-    gcdETotient = gcd(e, totient);
+    gcdETotient = gcd_iter(e, totient);
     
     d = inverse(e, totient);
   
-    c = powmod(m, e, n);
-    m1 = powmod(c, d, n);
+    c = powerMod(m, e, n);
+    m1 = powerMod(c, d, n);
   }
   
 
@@ -131,9 +132,7 @@ function RSAExample() {
 
   const reducerInputChange = (e) => {
     const { name, value } = e.target
-    dispatchFormValue({ [name]: BigInt(value) })
-    
-    console.log(inputValues)
+    dispatchFormValue({ [name]: BigInt(value) })  
   }
 
 
@@ -148,14 +147,14 @@ function RSAExample() {
 
       <label htmlFor="p">P = </label>
       <input name="p"
-        className={isPrime(p) ? "" : "error"}
+        className={pIsPrime ? "" : "error"}
         value={p.toString()} onChange={reducerInputChange}/>
 
       <br/>
 
       <label htmlFor="q">Q = </label>
       <input name="q"
-        className={isPrime(q) ? "" : "error"}
+        className={qIsPrime ? "" : "error"}
         value={q.toString()} onChange={reducerInputChange}/>
     </fieldset>
 
