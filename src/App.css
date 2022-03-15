@@ -1,0 +1,9 @@
+input {
+    font-size: 14pt;
+    border-radius: 4pt;
+    margin: 4pt;
+}
+
+.error {
+    border-color: red;
+}

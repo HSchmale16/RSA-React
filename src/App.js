@@ -4,6 +4,18 @@
  */
 
 import React, {useReducer} from "react";
+import './App.css'
+
+
+function isPrime(n) {
+  for (let d = 2n; d <= n/2n; d++) {
+    console.log(d, n % d)
+    if (n % d === 0n) {
+      return false;
+    }
+  }
+  return true;
+}
 
 function gcd(a, b) {
   if (b === 0n) {
@@ -83,7 +95,8 @@ function RSAExample() {
     p: 61n,
     q: 53n,
     e: 17n,
-    m: 65n // nice!!! : the message
+    m: 65n, // nice!!! : the message
+    c: 0n,
   }
 
   const [inputValues, dispatchFormValue] = useReducer(
@@ -94,18 +107,25 @@ function RSAExample() {
   const {p, q, e, m} = inputValues;
   console.log(inputValues);
 
-  const n = p * q;
+  var n='?',p1='?',q1='?',totient='?',gcdETotient='?',d='?',c='?';
+  var m1 = '?';
 
-  const p1 = p - 1n;
-  const q1 = q - 1n;
+  if (p !== q && p !== 0n && q !== 0n) {
+    n = p * q;
 
-  const totient = lcm(p1, q1);
-
-  const gcdETotient = gcd(e, totient);
+    p1 = p - 1n;
+    q1 = q - 1n;
   
-  const d = inverse(e, totient);
-
-  const c = powmod(m, e, n);
+    totient = lcm(p1, q1);
+  
+    gcdETotient = gcd(e, totient);
+    
+    d = inverse(e, totient);
+  
+    c = powmod(m, e, n);
+    m1 = powmod(c, d, n);
+  }
+  
 
   /* React form bullshit */
 
@@ -119,7 +139,7 @@ function RSAExample() {
 
   const onFormSubmit = (e) => {
     e.preventDefault();
-  } 
+  }
 
   return <form onSubmit={onFormSubmit}>
     <h1>Encrypt and Decrypt using RSA</h1>
@@ -127,7 +147,9 @@ function RSAExample() {
       <legend>Choose Prime P and Q</legend>
 
       <label htmlFor="p">P = </label>
-      <input name="p" value={p.toString()} onChange={reducerInputChange}/>
+      <input name="p"
+        className={isPrime(p) ? "" : "error"}
+        value={p.toString()} onChange={reducerInputChange}/>
 
       <br/>
 
@@ -137,7 +159,7 @@ function RSAExample() {
 
     <fieldset>
       <legend>Compute N = pq</legend>
-      <label htmlFor="n">N</label>
+      <label htmlFor="n">N = </label>
       <input name="n" value={n.toString()} disabled/>
     </fieldset>
 
@@ -197,7 +219,7 @@ function RSAExample() {
         <p>
           The private key is m(c) = c<sup>d</sup> mod n<br/>
             m({c.toString()}) = {c.toString()} <sup>{d.toString()}</sup>
-            mod {n.toString()} = {powmod(c, d, n).toString()}
+            mod {n.toString()} = {m1.toString()}
         </p>
       </fieldset>
 
