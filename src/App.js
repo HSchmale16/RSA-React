@@ -110,7 +110,7 @@ function RSAExample() {
   var n='?',p1='?',q1='?',totient='?',gcdETotient='?',d='?',c='?';
   var m1 = '?';
 
-  if (p !== q && p !== 0n && q !== 0n) {
+  if (p !== q && p !== 0n && q !== 0n && isPrime(p) && isPrime(q)) {
     n = p * q;
 
     p1 = p - 1n;
@@ -154,7 +154,9 @@ function RSAExample() {
       <br/>
 
       <label htmlFor="q">Q = </label>
-      <input name="q" value={q.toString()} onChange={reducerInputChange}/>
+      <input name="q"
+        className={isPrime(q) ? "" : "error"}
+        value={q.toString()} onChange={reducerInputChange}/>
     </fieldset>
 
     <fieldset>
