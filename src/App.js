@@ -136,11 +136,7 @@ function RSAExample() {
   }
 
 
-  const onFormSubmit = (e) => {
-    e.preventDefault();
-  }
-
-  return <form onSubmit={onFormSubmit}>
+  return <form>
     <h1>Encrypt and Decrypt using RSA</h1>
     <fieldset>
       <legend>Choose Prime P and Q</legend>
